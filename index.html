@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <canvas id="canvas" width="768" height="1024" style="float: left"></canvas>
+    <div id="wrapper" style="width: 200px; float: left">
+      <div id="color"></div>
+      <div id="pixel"></div>
+      <div id="whiterow"></div>
+      <div id="whitecol"></div>
+      <button id="grayBtn" data-next-state="grayscale">그레이스케일</button>
+      <button id="thresholdBtn" data-next-state="threshold">Threshold</button>
+      <hr />
+      <canvas id="zoom" width="300" height="227"></canvas>
+    </div>
+    <script src="./index.js"></script>
+  </body>
+</html>
