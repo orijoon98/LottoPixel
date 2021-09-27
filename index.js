@@ -1,15 +1,18 @@
-// 컨텍스트 생성 및 받아오기
 var img = new Image();
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var zoomctx = document.getElementById("zoom").getContext("2d");
 var color = document.getElementById("color");
 var pixel = document.getElementById("pixel");
+var updatebtn = document.getElementById("updateBtn");
 var graybtn = document.getElementById("grayBtn");
+var recognizebtn = document.getElementById("recognizeBtn");
 var thresholdbtn = document.getElementById("thresholdBtn");
 var whiterowbtn = document.getElementById("rowBtn");
-var whitecolbtn = document.getElementById("colBtn");
 var areabtn = document.getElementById("areaBtn");
+var arearowbtn = document.getElementById("areaRowBtn");
+var areacolbtn = document.getElementById("areaColBtn");
+var eachareabtn = document.getElementById("eachAreaBtn");
 var data;
 var imageData;
 var originalDataArray = []; // 그레이스케일 기능에서 원래 이미지를 저장하기 위한 배열
@@ -19,6 +22,18 @@ var colArray = [];
 var colMidArray = new Array(768);
 var area = [];
 var numArea = [];
+var eachArea = [];
+var numEachArea = [];
+var lotto = "";
+var datas = [];
+var drwNo = [];
+var drwtNo1 = [];
+var drwtNo2 = [];
+var drwtNo3 = [];
+var drwtNo4 = [];
+var drwtNo5 = [];
+var drwtNo6 = [];
+var bnusNo = [];
 
 // 이미지 로딩 완료시 실행될 부분
 function draw() {
@@ -73,6 +88,23 @@ function zoom(event) {
   );
 }
 
+function updateLotto() {
+  const URI = "https://hyeokjoon.com/data/lottodata.php";
+  axios.get(URI).then((result) => {
+    datas = result.data.datas;
+    for (var i = 0; i <= 52; i++) {
+      drwNo[i] = datas[i].drwNo;
+      drwtNo1[i] = datas[i].drwtNo1;
+      drwtNo2[i] = datas[i].drwtNo2;
+      drwtNo3[i] = datas[i].drwtNo3;
+      drwtNo4[i] = datas[i].drwtNo4;
+      drwtNo5[i] = datas[i].drwtNo5;
+      drwtNo6[i] = datas[i].drwtNo6;
+      bnusNo[i] = datas[i].bnusNo;
+    }
+  });
+}
+
 function grayscale(e) {
   var nextState = e.target.getAttribute("data-next-state");
   if (nextState == "grayscale") {
@@ -96,6 +128,26 @@ function grayscale(e) {
     e.target.setAttribute("data-next-state", "grayscale");
   }
   ctx.putImageData(imageData, 0, 0);
+}
+
+const worker = Tesseract.createWorker({
+  logger: (m) => console.log(m),
+});
+
+async function recognize() {
+  const img = document.getElementById("canvas");
+  await worker.load();
+  await worker.loadLanguage("eng");
+  await worker.initialize("eng");
+  await worker.setParameters({
+    tessedit_char_whitelist: "0123456789",
+  });
+  const {
+    data: { text },
+  } = await worker.recognize(img);
+  await worker.terminate();
+  lotto = text;
+  console.log(lotto);
 }
 
 function threshold(e) {
@@ -183,7 +235,78 @@ function searchRow() {
   }
 }
 
-function searchCol() {
+function searchArea() {
+  var index = 0;
+  for (var i = 0; i < 1024; i++) {
+    if (rowMidArray[i] == 0) {
+      for (var j = i; j < 1024; j++) {
+        if (rowMidArray[j] == 1) {
+          j = j - 1;
+          var xy = [];
+          xy[0] = 0;
+          xy[1] = i;
+          xy[2] = 767;
+          xy[3] = j;
+          area[index] = xy;
+          index++;
+          i = j;
+          break;
+        }
+      }
+    }
+  }
+  numArea[0] = area[4][0];
+  numArea[1] = area[4][1];
+  numArea[2] = area[4][2];
+  numArea[3] = area[4][3];
+}
+
+function searchAreaRow() {
+  rowArray.fill(0);
+  rowMidArray.fill(0);
+  for (var y = numArea[1]; y <= numArea[3]; y++) {
+    var pixelArray = [];
+    for (var x = numArea[0]; x <= numArea[2]; x++) {
+      var pixel = ctx.getImageData(x, y, 1, 1);
+      var data = pixel.data;
+      var avg = (data[0] + data[1] + data[2]) / 3;
+      if (avg == 0) pixelArray[x] = 0;
+      else pixelArray[x] = 1;
+    }
+    var cnt = 0;
+    var thres = 95;
+    for (var clr of pixelArray) {
+      if (clr == 1) cnt++;
+    }
+    if ((cnt / (numArea[2] - numArea[0])) * 100 > thres) {
+      rowArray[y] = 1;
+    } else rowArray[y] = 0;
+  }
+  for (var start = 0; start < 1024; start++) {
+    if (rowArray[start] == 1) {
+      var end;
+      for (var i = start; i < 1024; i++) {
+        if (rowArray[i] == 0) {
+          end = i - 1;
+          var mid = Math.floor((start + end) / 2);
+          rowMidArray[mid] = 1;
+          //선 그리기
+          if (end - start > 3) {
+            ctx.beginPath();
+            ctx.moveTo(numArea[0], mid);
+            ctx.lineTo(numArea[2], mid);
+            ctx.stroke();
+          } else {
+            rowMidArray[mid] = 0;
+          }
+          break;
+        }
+      }
+    }
+  }
+}
+
+function searchAreaCol() {
   colMidArray.fill(0);
   for (var x = numArea[0]; x <= numArea[2]; x++) {
     var pixelArray = [];
@@ -227,39 +350,67 @@ function searchCol() {
   }
 }
 
-function searchArea() {
+function searchEachArea() {
+  console.log(numArea[1]);
+  console.log(numArea[3]);
+  console.log(rowMidArray);
+  console.log(colMidArray);
   var index = 0;
-  for (var i = 0; i < 1024; i++) {
-    if (rowMidArray[i] == 0) {
-      for (var j = i; j < 1024; j++) {
-        if (rowMidArray[j] == 1) {
-          j = j - 1;
+  for (var j = numArea[1]; j <= numArea[3]; j++) {
+    var nj;
+    for (nj = j; nj <= numArea[3]; nj++) {
+      if (rowMidArray[nj] == 0) {
+        j = nj;
+        break;
+      }
+    }
+    for (var i = 0; i < 768; i++) {
+      var ni;
+      for (ni = i; ni < 768; ni++) {
+        if (colMidArray[ni] == 0) {
+          i = ni;
           var xy = [];
-          xy[0] = 0;
-          xy[1] = i;
-          xy[2] = 767;
-          xy[3] = j;
-          area[index] = xy;
+          xy[0] = i;
+          xy[1] = j;
+          eachArea[index] = xy;
           index++;
-          i = j;
           break;
         }
       }
+      for (ni = i; ni < 768; ni++) {
+        if (colMidArray[ni] == 1) {
+          i = ni;
+          break;
+        }
+        if (ni == 767) {
+          i = 767;
+        }
+      }
+    }
+    for (nj = j; nj <= numArea[3]; nj++) {
+      if (rowMidArray[nj] == 1) {
+        j = nj;
+        break;
+      }
+      if (nj == numArea[3]) {
+        j = numArea[3];
+      }
     }
   }
-  numArea[0] = area[4][0];
-  numArea[1] = area[4][1];
-  numArea[2] = area[4][2];
-  numArea[3] = area[4][3];
+  console.log(eachArea);
 }
 
 img.src = "./lotto.jpeg";
 img.onload = draw;
 canvas.addEventListener("mousemove", pick);
 canvas.addEventListener("mousemove", showPixel);
+canvas.addEventListener("mousemove", zoom);
+updatebtn.addEventListener("click", updateLotto);
 graybtn.addEventListener("click", grayscale);
+recognizebtn.addEventListener("click", recognize);
 thresholdbtn.addEventListener("click", threshold);
 whiterowbtn.addEventListener("click", searchRow);
-whitecolbtn.addEventListener("click", searchCol);
 areabtn.addEventListener("click", searchArea);
-canvas.addEventListener("mousemove", zoom);
+arearowbtn.addEventListener("click", searchAreaRow);
+areacolbtn.addEventListener("click", searchAreaCol);
+eachareabtn.addEventListener("click", searchEachArea);
