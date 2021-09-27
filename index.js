@@ -1,15 +1,21 @@
 var img = new Image();
 var canvas = document.getElementById("canvas");
+var resultcanvas = document.getElementById("resultCanvas");
+var cropcanvas = document.getElementById("cropCanvas");
 var ctx = canvas.getContext("2d");
+var rctx = resultcanvas.getContext("2d");
+var cctx = cropcanvas.getContext("2d");
+var cropimg = document.getElementById("cropImg");
 var zoomctx = document.getElementById("zoom").getContext("2d");
 var color = document.getElementById("color");
 var pixel = document.getElementById("pixel");
 var updatebtn = document.getElementById("updateBtn");
 var graybtn = document.getElementById("grayBtn");
-var recognizebtn = document.getElementById("recognizeBtn");
 var thresholdbtn = document.getElementById("thresholdBtn");
 var whiterowbtn = document.getElementById("rowBtn");
 var areabtn = document.getElementById("areaBtn");
+var cropbtn = document.getElementById("cropBtn");
+var recognizebtn = document.getElementById("recognizeBtn");
 var arearowbtn = document.getElementById("areaRowBtn");
 var areacolbtn = document.getElementById("areaColBtn");
 var eachareabtn = document.getElementById("eachAreaBtn");
@@ -38,8 +44,8 @@ var bnusNo = [];
 // 이미지 로딩 완료시 실행될 부분
 function draw() {
   ctx.drawImage(img, 0, 0);
+  rctx.drawImage(img, 0, 0);
   img.style.display = "none";
-  // ctx.getImageData(sx, sy, sw, sh);
   imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   data = imageData.data;
 }
@@ -68,11 +74,18 @@ function pick(event) {
   }
 }
 
+//픽셀 좌표
+function showPixel(event) {
+  var x = event.layerX;
+  var y = event.layerY;
+  var pixelText = "pixel(" + x + ", " + y + ")";
+  pixel.textContent = pixelText;
+}
+
 // 돋보기 기능
 function zoom(event) {
   var x = event.layerX;
   var y = event.layerY;
-  // ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   var SPX = 20;
   var DPX = 200;
   zoomctx.drawImage(
@@ -130,26 +143,6 @@ function grayscale(e) {
   ctx.putImageData(imageData, 0, 0);
 }
 
-const worker = Tesseract.createWorker({
-  logger: (m) => console.log(m),
-});
-
-async function recognize() {
-  const img = document.getElementById("canvas");
-  await worker.load();
-  await worker.loadLanguage("eng");
-  await worker.initialize("eng");
-  await worker.setParameters({
-    tessedit_char_whitelist: "0123456789",
-  });
-  const {
-    data: { text },
-  } = await worker.recognize(img);
-  await worker.terminate();
-  lotto = text;
-  console.log(lotto);
-}
-
 function threshold(e) {
   var nextState = e.target.getAttribute("data-next-state");
   if (nextState == "threshold") {
@@ -181,14 +174,6 @@ function threshold(e) {
     e.target.setAttribute("data-next-state", "threshold");
   }
   ctx.putImageData(imageData, 0, 0);
-}
-
-//픽셀 좌표
-function showPixel(event) {
-  var x = event.layerX;
-  var y = event.layerY;
-  var pixelText = "pixel(" + x + ", " + y + ")";
-  pixel.textContent = pixelText;
 }
 
 function searchRow() {
@@ -259,6 +244,33 @@ function searchArea() {
   numArea[1] = area[4][1];
   numArea[2] = area[4][2];
   numArea[3] = area[4][3];
+}
+
+async function crop() {
+  var w = area[4][2] - area[2][0];
+  var h = area[4][3] - area[2][1];
+  await cropimg.setAttribute("src", canvas.toDataURL());
+  await cctx.drawImage(cropimg, area[2][0], area[2][1], w, h, 0, 0, w, h);
+  await cropimg.setAttribute("src", cropcanvas.toDataURL());
+}
+
+const worker = Tesseract.createWorker({
+  logger: (m) => console.log(m),
+});
+
+async function recognize() {
+  await worker.load();
+  await worker.loadLanguage("eng");
+  await worker.initialize("eng");
+  await worker.setParameters({
+    tessedit_char_whitelist: "0123456789",
+  });
+  const {
+    data: { text },
+  } = await worker.recognize(cropimg);
+  await worker.terminate();
+  lotto = text;
+  console.log(lotto);
 }
 
 function searchAreaRow() {
@@ -351,10 +363,6 @@ function searchAreaCol() {
 }
 
 function searchEachArea() {
-  console.log(numArea[1]);
-  console.log(numArea[3]);
-  console.log(rowMidArray);
-  console.log(colMidArray);
   var index = 0;
   for (var j = numArea[1]; j <= numArea[3]; j++) {
     var nj;
@@ -407,10 +415,11 @@ canvas.addEventListener("mousemove", showPixel);
 canvas.addEventListener("mousemove", zoom);
 updatebtn.addEventListener("click", updateLotto);
 graybtn.addEventListener("click", grayscale);
-recognizebtn.addEventListener("click", recognize);
 thresholdbtn.addEventListener("click", threshold);
 whiterowbtn.addEventListener("click", searchRow);
 areabtn.addEventListener("click", searchArea);
+cropbtn.addEventListener("click", crop);
+recognizebtn.addEventListener("click", recognize);
 arearowbtn.addEventListener("click", searchAreaRow);
 areacolbtn.addEventListener("click", searchAreaCol);
 eachareabtn.addEventListener("click", searchEachArea);

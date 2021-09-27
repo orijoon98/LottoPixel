@@ -12,16 +12,30 @@
       <div id="pixel"></div>
       <button id="updateBtn">업데이트</button>
       <button id="grayBtn" data-next-state="grayscale">그레이스케일</button>
-      <button id="recognizeBtn">문자 인식</button>
       <button id="thresholdBtn" data-next-state="threshold">Threshold</button>
       <button id="rowBtn">흰색 가로선</button>
       <button id="areaBtn">영역 구분</button>
+      <button id="cropBtn">영역 크롭</button>
+      <button id="recognizeBtn">문자 인식</button>
       <button id="areaRowBtn">영역 가로선</button>
       <button id="areaColBtn">영역 세로선</button>
       <button id="eachAreaBtn">숫자영역 구분</button>
       <hr />
       <canvas id="zoom" width="300" height="227"></canvas>
     </div>
+    <canvas
+      id="resultCanvas"
+      width="768"
+      height="1024"
+      style="float: left"
+    ></canvas>
+    <canvas
+      id="cropCanvas"
+      width="768"
+      height="1024"
+      style="float: left"
+    ></canvas>
+    <img id="cropImg" style="display: none" />
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js"></script>
     <script src="./index.js"></script>
