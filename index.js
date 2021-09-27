@@ -40,6 +40,7 @@ var drwtNo4 = [];
 var drwtNo5 = [];
 var drwtNo6 = [];
 var bnusNo = [];
+var winNo = [];
 
 // 이미지 로딩 완료시 실행될 부분
 function draw() {
@@ -115,6 +116,7 @@ function updateLotto() {
       drwtNo6[i] = datas[i].drwtNo6;
       bnusNo[i] = datas[i].bnusNo;
     }
+    console.log(drwNo);
   });
 }
 
@@ -271,6 +273,19 @@ async function recognize() {
   await worker.terminate();
   lotto = text;
   console.log(lotto);
+  lotto = lotto.split("\n");
+  lotto[0] = lotto[0].substr(0, lotto[0].length - 1);
+  var tIndex = 52 - (parseInt(drwNo[52]) - parseInt(lotto[0]));
+  winNo = [
+    drwtNo1[tIndex],
+    drwtNo2[tIndex],
+    drwtNo3[tIndex],
+    drwtNo4[tIndex],
+    drwtNo5[tIndex],
+    drwtNo6[tIndex],
+    bnusNo[tIndex],
+  ];
+  console.log(winNo);
 }
 
 function searchAreaRow() {
