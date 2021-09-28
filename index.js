@@ -41,6 +41,8 @@ var drwtNo5 = [];
 var drwtNo6 = [];
 var bnusNo = [];
 var winNo = [];
+var curNum = [];
+var curNumArea = [];
 
 // 이미지 로딩 완료시 실행될 부분
 function draw() {
@@ -286,6 +288,21 @@ async function recognize() {
     bnusNo[tIndex],
   ];
   console.log(winNo);
+  var cnt = 0;
+  for (var i = 0; i < lotto.length; i++) {
+    if (lotto[i].length == 12) {
+      var one = parseInt(lotto[i].substr(0, 2));
+      var two = parseInt(lotto[i].substr(2, 2));
+      var three = parseInt(lotto[i].substr(4, 2));
+      var four = parseInt(lotto[i].substr(6, 2));
+      var five = parseInt(lotto[i].substr(8, 2));
+      var six = parseInt(lotto[i].substr(10, 2));
+      var curNums = [one, two, three, four, five, six];
+      curNum[cnt] = curNums;
+      cnt++;
+    }
+  }
+  console.log(curNum);
 }
 
 function searchAreaRow() {
@@ -421,6 +438,16 @@ function searchEachArea() {
     }
   }
   console.log(eachArea);
+  var cnt = 0;
+  for (var n = 10; n < eachArea.length; n++) {
+    if (n % 10 >= 4 && n % 10 <= 9) {
+      if (n % 10 == 4) curNumArea[cnt] = new Array(6);
+      curNumArea[cnt][(n % 10) - 4] = eachArea[n];
+      if (n % 10 == 9) cnt++;
+      if (cnt == 5) break;
+    }
+  }
+  console.log(curNumArea);
 }
 
 img.src = "./lotto.jpeg";
