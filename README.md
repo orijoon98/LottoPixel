@@ -576,9 +576,9 @@ function drawCircle(i, j) {
 
 ```jsx
 function getResult() {
-  var cnt = 0,
-    bcnt = 0;
   for (var i = 0; i < curNum.length; i++) {
+    var cnt = 0,
+      bcnt = 0;
     for (var j = 0; j < 6; j++) {
       var num = curNum[i][j];
       for (var w = 0; w < 6; w++) {
@@ -593,25 +593,25 @@ function getResult() {
         }
       }
     }
-  }
-  if (cnt == 6) {
-    console.log("1등");
-    result.textContent = "1등";
-  } else if (cnt == 5 && bcnt == 1) {
-    console.log("2등");
-    result.textContent = "2등";
-  } else if (cnt == 5 && bcnt == 0) {
-    console.log("3등");
-    result.textContent = "3등";
-  } else if (cnt == 4) {
-    console.log("4등");
-    result.textContent = "4등";
-  } else if (cnt == 3) {
-    console.log("5등");
-    result.textContent = "5등";
-  } else {
-    console.log("낙첨");
-    result.textContent = "낙첨";
+    if (cnt == 6) {
+      console.log("1등");
+      result.textContent += "1등 ";
+    } else if (cnt == 5 && bcnt == 1) {
+      console.log("2등");
+      result.textContent += "2등 ";
+    } else if (cnt == 5 && bcnt == 0) {
+      console.log("3등");
+      result.textContent += "3등 ";
+    } else if (cnt == 4) {
+      console.log("4등");
+      result.textContent += "4등 ";
+    } else if (cnt == 3) {
+      console.log("5등");
+      result.textContent += "5등 ";
+    } else {
+      console.log("낙첨");
+      result.textContent += "낙첨 ";
+    }
   }
   canvas.style.display = "none";
   cropcanvas.style.display = "none";
