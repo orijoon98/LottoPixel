@@ -505,6 +505,7 @@ function getResult() {
   canvas.style.display = "none";
   cropcanvas.style.display = "none";
   wrapper.style.display = "none";
+  resultcanvas.style.display = "block";
 }
 
 img.src = "./lotto.jpeg";
