@@ -31,7 +31,7 @@
 
 ## 당첨번호 API 호출
 
-[](https://hyeokjoon.com/data/lottodata.php)
+[https://hyeokjoon.com/data/lottodata.php](https://hyeokjoon.com/data/lottodata.php)
 
 개인 RPI4 웹서버에 만들어둔 1년치 로또 내역이다. 
 
