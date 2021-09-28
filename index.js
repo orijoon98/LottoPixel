@@ -6,6 +6,7 @@ var ctx = canvas.getContext("2d");
 var rctx = resultcanvas.getContext("2d");
 var cctx = cropcanvas.getContext("2d");
 var cropimg = document.getElementById("cropImg");
+var wrapper = document.getElementById("wrapper");
 var zoomctx = document.getElementById("zoom").getContext("2d");
 var color = document.getElementById("color");
 var pixel = document.getElementById("pixel");
@@ -19,6 +20,8 @@ var recognizebtn = document.getElementById("recognizeBtn");
 var arearowbtn = document.getElementById("areaRowBtn");
 var areacolbtn = document.getElementById("areaColBtn");
 var eachareabtn = document.getElementById("eachAreaBtn");
+var resultbtn = document.getElementById("resultBtn");
+var result = document.getElementById("result");
 var data;
 var imageData;
 var originalDataArray = []; // 그레이스케일 기능에서 원래 이미지를 저장하기 위한 배열
@@ -450,6 +453,60 @@ function searchEachArea() {
   console.log(curNumArea);
 }
 
+function drawCircle(i, j) {
+  var w = (curNumArea[0][1][0] - curNumArea[0][0][0] - 10) / 2;
+  var h = (curNumArea[1][0][1] - curNumArea[0][0][1] - 3) / 2;
+  var x = curNumArea[i][j][0] + w - 5;
+  var y = curNumArea[i][j][1] + h;
+  var r = curNumArea[1][0][1] - curNumArea[0][0][1] - 3;
+  rctx.beginPath();
+  rctx.arc(x, y, r, 0, 2 * Math.PI);
+  rctx.stroke();
+}
+
+function getResult() {
+  var cnt = 0,
+    bcnt = 0;
+  for (var i = 0; i < curNum.length; i++) {
+    for (var j = 0; j < 6; j++) {
+      var num = curNum[i][j];
+      for (var w = 0; w < 6; w++) {
+        if (winNo[w] == num) {
+          drawCircle(i, j);
+          cnt++;
+        }
+        if (winNo[6] == num) {
+          drawCircle(i, j);
+          bcnt++;
+          break;
+        }
+      }
+    }
+  }
+  if (cnt == 6) {
+    console.log("1등");
+    result.textContent = "1등";
+  } else if (cnt == 5 && bcnt == 1) {
+    console.log("2등");
+    result.textContent = "2등";
+  } else if (cnt == 5 && bcnt == 0) {
+    console.log("3등");
+    result.textContent = "3등";
+  } else if (cnt == 4) {
+    console.log("4등");
+    result.textContent = "4등";
+  } else if (cnt == 3) {
+    console.log("5등");
+    result.textContent = "5등";
+  } else {
+    console.log("낙첨");
+    result.textContent = "낙첨";
+  }
+  canvas.style.display = "none";
+  cropcanvas.style.display = "none";
+  wrapper.style.display = "none";
+}
+
 img.src = "./lotto.jpeg";
 img.onload = draw;
 canvas.addEventListener("mousemove", pick);
@@ -465,3 +522,4 @@ recognizebtn.addEventListener("click", recognize);
 arearowbtn.addEventListener("click", searchAreaRow);
 areacolbtn.addEventListener("click", searchAreaCol);
 eachareabtn.addEventListener("click", searchEachArea);
+resultbtn.addEventListener("click", getResult);
